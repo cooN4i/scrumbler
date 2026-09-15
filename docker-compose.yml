@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: scrumbler_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-scrumbler_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-scrumbler_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-scrumbler_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-scrumbler_user} -d ${POSTGRES_DB:-scrumbler_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: scrumbler_web
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - PROJECT_NAME=Scrumbler
+      - DEBUG=False
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-scrumbler_user}:${POSTGRES_PASSWORD:-scrumbler_pass}@db:5432/${POSTGRES_DB:-scrumbler_db}
+      - SECRET_KEY=${SECRET_KEY:-e84f938d2bc1049ea7f2c61093bc2f5a81e3d091a4b5687cf109247ad8940ef2}
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=10080
+
+volumes:
+  postgres_data:

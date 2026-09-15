@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrumbler — WCA Speedcubing Timer</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <header class="navbar">
+        <a href="/" class="nav-brand">
+            {% include "components/rubik_cube.html" %}
+            <span class="brand-name">Scrum<span>bler</span></span>
+        </a>
+
+        <nav class="nav-links">
+            <a href="/" class="nav-item active">Таймер</a>
+            <a href="/history" class="nav-item">История</a>
+            
+            {% if user %}
+            <div class="user-badge">
+                <span>Кубер: <strong class="user-name">{{ user.username }}</strong></span>
+                <button class="btn-logout" onclick="API.logout()" title="Выйти">Выйти</button>
+            </div>
+            {% else %}
+            <div class="user-badge" style="border-color: rgba(255, 255, 255, 0.08);">
+                <span style="color: var(--text-muted);">Режим: <strong style="color: var(--text-primary);">Гость</strong></span>
+                <a href="/login" class="nav-item" style="color: var(--accent-cyan); font-weight: 600; padding: 2px 8px;">Войти</a>
+            </div>
+            {% endif %}
+        </nav>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-container">
+
+        {% if not user %}
+        <!-- Guest Notification Banner -->
+        <div class="guest-banner">
+            <div>
+                ⚡ <strong>Режим гостя:</strong> чистый таймер для тренировок. Сборки и статистика не сохраняются.
+            </div>
+            <a href="/login" class="btn-action" style="padding: 6px 14px; text-decoration: none; font-size: 0.85rem; background: var(--accent-cyan); color: #000; font-weight: 700;">Войти в аккаунт</a>
+        </div>
+        {% endif %}
+
+        <!-- Scramble Card -->
+        <section class="scramble-box">
+            <div class="scramble-title">Скрамбл 3x3x3 (WCA)</div>
+            <div id="scramble-text" class="scramble-text">Генерация скрамбла...</div>
+            <div class="scramble-actions">
+                <button id="btn-next-scramble" class="btn-icon">Следующий скрамбл</button>
+                <button id="btn-copy-scramble" class="btn-icon">Копировать</button>
+            </div>
+        </section>
+
+        <!-- Timer Screen Arena -->
+        <section class="timer-arena">
+            <div id="timer-display" class="timer-display">0.00</div>
+            <div class="timer-hint">Зажмите <strong>Пробел</strong> (подождите зеленый цвет) и отпустите для старта</div>
+
+            <!-- Quick Post-solve Actions (Только для авторизованных) -->
+            {% if user %}
+            <div id="quick-actions" class="quick-actions">
+                <button id="btn-plus-two" class="btn-action">+2 (кнопка '2')</button>
+                <button id="btn-dnf" class="btn-action btn-action-dnf">DNF (кнопка 'D')</button>
+                <button id="btn-delete" class="btn-action btn-action-del">Удалить (Backspace)</button>
+            </div>
+            {% endif %}
+        </section>
+
+        {% if user %}
+        <!-- Statistics Dashboard -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Personal Best (PB)</span>
+                <span id="stat-pb" class="stat-value">--</span>
+                <span class="stat-sub">Лучшее одиночное</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Average of 5 (ao5)</span>
+                <span id="stat-ao5" class="stat-value">--</span>
+                <span id="stat-best-ao5" class="stat-sub">Best: --</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Average of 12 (ao12)</span>
+                <span id="stat-ao12" class="stat-value">--</span>
+                <span id="stat-best-ao12" class="stat-sub">Best: --</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Average of 100</span>
+                <span id="stat-ao100" class="stat-value">--</span>
+                <span class="stat-sub">Текущий ao100</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Всего сборок</span>
+                <span id="stat-total" class="stat-value">0</span>
+                <span class="stat-sub">В текущей сессии</span>
+            </div>
+        </section>
+
+        <!-- Recent Solves Strip -->
+        <section class="recent-section">
+            <div class="section-header">
+                <span class="section-title">Последние сборки</span>
+                <a href="/history" style="color: var(--accent-cyan); font-size: 0.85rem; text-decoration: none;">Смотреть все →</a>
+            </div>
+            <div id="recent-list" class="recent-list">
+                <!-- Dynamically populated chips -->
+            </div>
+        </section>
+        {% endif %}
+
+    </main>
+
+    <script>
+        window.IS_GUEST = {{ 'true' if not user else 'false' }};
+    </script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/timer.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+/* Brand 3D Rubik's Cube SVG */
+.brand-cube-icon {
+    width: 32px;
+    height: 32px;
+    filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.4));
+    transition: transform 0.3s ease;
+}
+
+.nav-brand:hover .brand-cube-icon {
+    transform: rotate(15deg) scale(1.08);
+}
+
+/* Guest Mode Banner */
+.guest-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 240, 255, 0.05);
+    border: 1px dashed rgba(0, 240, 255, 0.3);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.guest-banner strong {
+    color: var(--accent-cyan);
+}
+
+.guest-hint-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.guest-hint-card h3 {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.guest-hint-card p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    max-width: 500px;
+}
