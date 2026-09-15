@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class UserBase(BaseModel):
@@ -22,12 +23,15 @@ class UserCreate(UserBase):
         if not re.search(r"\d", v):
             raise ValueError("Пароль должен содержать хотя бы одну цифру (0-9)")
         if not re.search(r"[!@#$%^&*(),.?\":{}|<>\-_+=\[\]\\/`~]", v):
-            raise ValueError("Пароль должен содержать хотя бы один специальный символ (!@#$%^&*...)")
+            raise ValueError(
+                "Пароль должен содержать хотя бы один специальный символ (!@#$%^&*...)"
+            )
         return v
 
 
 class UserLogin(UserBase):
     """Schema for user login. Does not re-validate password complexity on existing passwords."""
+
     password: str = Field(..., min_length=1, max_length=100)
 
 

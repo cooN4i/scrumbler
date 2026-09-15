@@ -1,15 +1,18 @@
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from app.main import app
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
 from app.core.database import Base, get_db
+from app.main import app
 
 # Isolated in-memory async SQLite for integration tests
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 
 test_engine = create_async_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
-TestingSessionLocal = async_sessionmaker(bind=test_engine, class_=AsyncSession, expire_on_commit=False)
+TestingSessionLocal = async_sessionmaker(
+    bind=test_engine, class_=AsyncSession, expire_on_commit=False
+)
 
 
 async def override_get_db():
@@ -35,10 +38,10 @@ async def test_auth_and_solve_flow():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         # 1. Register User
-        reg_resp = await ac.post("/api/auth/register", json={
-            "username": "cubemaster",
-            "password": "SecretPass123!"
-        })
+        reg_resp = await ac.post(
+            "/api/auth/register",
+            json={"username": "cubemaster", "password": "SecretPass123!"},
+        )
         assert reg_resp.status_code == 201
         data = reg_resp.json()
         token = data["access_token"]
@@ -53,11 +56,11 @@ async def test_auth_and_solve_flow():
         assert len(scramble.split()) == 21
 
         # 3. Save a solve (11.52 sec)
-        solve_resp = await ac.post("/api/solves", headers=headers, json={
-            "raw_time_ms": 11520,
-            "scramble": scramble,
-            "penalty": "none"
-        })
+        solve_resp = await ac.post(
+            "/api/solves",
+            headers=headers,
+            json={"raw_time_ms": 11520, "scramble": scramble, "penalty": "none"},
+        )
         assert solve_resp.status_code == 201
         solve_data = solve_resp.json()
         solve_id = solve_data["id"]
@@ -71,9 +74,9 @@ async def test_auth_and_solve_flow():
         assert stats["pb"] == "11.52"
 
         # 5. Apply +2 Penalty
-        penalty_resp = await ac.patch(f"/api/solves/{solve_id}", headers=headers, json={
-            "penalty": "+2"
-        })
+        penalty_resp = await ac.patch(
+            f"/api/solves/{solve_id}", headers=headers, json={"penalty": "+2"}
+        )
         assert penalty_resp.status_code == 200
         assert penalty_resp.json()["formatted_time"] == "13.52+"
 

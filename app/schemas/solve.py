@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Literal
-from pydantic import BaseModel, Field, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class SolveCreate(BaseModel):
@@ -28,10 +29,10 @@ class SolveResponse(BaseModel):
 
 class StatsResponse(BaseModel):
     total_solves: int
-    pb: str | None = None          # Personal Best Single formatted
+    pb: str | None = None  # Personal Best Single formatted
     pb_raw_ms: int | None = None
-    ao5: str | None = None         # Current Average of 5
-    ao12: str | None = None        # Current Average of 12
-    ao100: str | None = None       # Current Average of 100
+    ao5: str | None = None  # Current Average of 5
+    ao12: str | None = None  # Current Average of 12
+    ao100: str | None = None  # Current Average of 100
     best_ao5: str | None = None
     best_ao12: str | None = None

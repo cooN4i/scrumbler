@@ -1,11 +1,13 @@
-from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum
 import enum
+from datetime import UTC, datetime
+
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+
 from app.core.database import Base
 
 
-class PenaltyType(str, enum.Enum):
+class PenaltyType(enum.StrEnum):
     NONE = "none"
     PLUS_TWO = "+2"
     DNF = "dnf"
@@ -15,11 +17,15 @@ class Solve(Base):
     __tablename__ = "solves"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     raw_time_ms = Column(Integer, nullable=False)  # Time in milliseconds (e.g. 12340 = 12.34s)
-    penalty = Column(String(10), default=PenaltyType.NONE.value, nullable=False)  # 'none', '+2', 'dnf'
+    penalty = Column(
+        String(10), default=PenaltyType.NONE.value, nullable=False
+    )  # 'none', '+2', 'dnf'
     scramble = Column(String(255), nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False, index=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False, index=True)
 
     # Relationships
     user = relationship("User", back_populates="solves")

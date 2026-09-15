@@ -1,6 +1,7 @@
-from typing import Sequence
 import math
-from app.models.solve import Solve, PenaltyType
+from collections.abc import Sequence
+
+from app.models.solve import PenaltyType, Solve
 
 
 def format_time(time_ms: int | None, penalty: str = "none") -> str:
@@ -19,10 +20,7 @@ def format_time(time_ms: int | None, penalty: str = "none") -> str:
     minutes = int(total_seconds // 60)
     seconds = total_seconds % 60
 
-    if minutes > 0:
-        formatted = f"{minutes}:{seconds:05.2f}"
-    else:
-        formatted = f"{seconds:.2f}"
+    formatted = f"{minutes}:{seconds:05.2f}" if minutes > 0 else f"{seconds:.2f}"
 
     if penalty == PenaltyType.PLUS_TWO.value:
         formatted += "+"
@@ -111,26 +109,30 @@ def compute_wca_stats(solves: Sequence[Solve]) -> dict:
     best_ao5_ms = None
     if len(times) >= 5:
         for i in range(len(times) - 4):
-            val = calculate_average_trimmed(times[i:i+5])
-            if val is not None:
-                if best_ao5_ms is None or val < best_ao5_ms:
-                    best_ao5_ms = val
+            val = calculate_average_trimmed(times[i : i + 5])
+            if val is not None and (best_ao5_ms is None or val < best_ao5_ms):
+                best_ao5_ms = val
 
     best_ao12_ms = None
     if len(times) >= 12:
         for i in range(len(times) - 11):
-            val = calculate_average_trimmed(times[i:i+12])
-            if val is not None:
-                if best_ao12_ms is None or val < best_ao12_ms:
-                    best_ao12_ms = val
+            val = calculate_average_trimmed(times[i : i + 12])
+            if val is not None and (best_ao12_ms is None or val < best_ao12_ms):
+                best_ao12_ms = val
 
     return {
         "total_solves": len(solves),
         "pb": format_time(pb_ms) if pb_ms is not None else None,
         "pb_raw_ms": pb_ms,
-        "ao5": "DNF" if (len(times) >= 5 and current_ao5_ms is None) else (format_time(current_ao5_ms) if current_ao5_ms else None),
-        "ao12": "DNF" if (len(times) >= 12 and current_ao12_ms is None) else (format_time(current_ao12_ms) if current_ao12_ms else None),
-        "ao100": "DNF" if (len(times) >= 100 and current_ao100_ms is None) else (format_time(current_ao100_ms) if current_ao100_ms else None),
+        "ao5": "DNF"
+        if (len(times) >= 5 and current_ao5_ms is None)
+        else (format_time(current_ao5_ms) if current_ao5_ms else None),
+        "ao12": "DNF"
+        if (len(times) >= 12 and current_ao12_ms is None)
+        else (format_time(current_ao12_ms) if current_ao12_ms else None),
+        "ao100": "DNF"
+        if (len(times) >= 100 and current_ao100_ms is None)
+        else (format_time(current_ao100_ms) if current_ao100_ms else None),
         "best_ao5": format_time(best_ao5_ms) if best_ao5_ms is not None else None,
         "best_ao12": format_time(best_ao12_ms) if best_ao12_ms is not None else None,
     }

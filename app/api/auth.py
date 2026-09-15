@@ -1,20 +1,22 @@
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy import select
-from app.core.database import get_db
-from app.core.security import verify_password, get_password_hash, create_access_token, decode_access_token
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.config import settings
+from app.core.database import get_db
+from app.core.security import (
+    create_access_token,
+    decode_access_token,
+    get_password_hash,
+    verify_password,
+)
 from app.models.user import User
-from app.schemas.user import UserCreate, UserLogin, UserResponse, Token
+from app.schemas.user import Token, UserCreate, UserLogin, UserResponse
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
-async def get_current_user(
-    request: Request,
-    db: AsyncSession = Depends(get_db)
-) -> User:
+async def get_current_user(request: Request, db: AsyncSession = Depends(get_db)) -> User:
     """Dependency to retrieve currently authenticated user from Bearer header or Cookie."""
     token = None
     # 1. Check Authorization Bearer header
@@ -54,10 +56,7 @@ async def get_current_user(
     return user
 
 
-async def get_optional_user(
-    request: Request,
-    db: AsyncSession = Depends(get_db)
-) -> Optional[User]:
+async def get_optional_user(request: Request, db: AsyncSession = Depends(get_db)) -> User | None:
     """Dependency that returns current user or None if not logged in."""
     try:
         return await get_current_user(request, db)
@@ -66,17 +65,12 @@ async def get_optional_user(
 
 
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
-async def register(
-    user_in: UserCreate,
-    response: Response,
-    db: AsyncSession = Depends(get_db)
-):
+async def register(user_in: UserCreate, response: Response, db: AsyncSession = Depends(get_db)):
     # Check if user already exists
     existing = await db.execute(select(User).where(User.username == user_in.username))
     if existing.scalar_one_or_none():
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already taken"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Username already taken"
         )
 
     # Create new user
@@ -96,28 +90,21 @@ async def register(
         httponly=True,
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         samesite="lax",
-        secure=not settings.DEBUG
+        secure=not settings.DEBUG,
     )
 
-    return Token(
-        access_token=token,
-        user=UserResponse.model_validate(new_user)
-    )
+    return Token(access_token=token, user=UserResponse.model_validate(new_user))
 
 
 @router.post("/login", response_model=Token)
-async def login(
-    user_in: UserLogin,
-    response: Response,
-    db: AsyncSession = Depends(get_db)
-):
+async def login(user_in: UserLogin, response: Response, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.username == user_in.username))
     user = result.scalar_one_or_none()
 
     if not user or not verify_password(user_in.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password"
+            detail="Incorrect username or password",
         )
 
     token = create_access_token({"sub": user.username, "user_id": user.id})
@@ -128,13 +115,10 @@ async def login(
         httponly=True,
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         samesite="lax",
-        secure=not settings.DEBUG
+        secure=not settings.DEBUG,
     )
 
-    return Token(
-        access_token=token,
-        user=UserResponse.model_validate(user)
-    )
+    return Token(access_token=token, user=UserResponse.model_validate(user))
 
 
 @router.post("/logout")

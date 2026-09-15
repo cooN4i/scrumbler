@@ -1,5 +1,3 @@
-import os
-from typing import Literal
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,11 +19,7 @@ class Settings(BaseSettings):
     # Cookie name for web interface
     AUTH_COOKIE_NAME: str = "scrumbler_token"
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
 settings = Settings()

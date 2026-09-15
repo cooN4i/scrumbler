@@ -1,7 +1,5 @@
-import pytest
-from app.services.scrambler import generate_scramble_3x3, FACE_TO_AXIS
-from app.services.stats import calculate_average_trimmed, format_time, compute_wca_stats
-from app.models.solve import Solve, PenaltyType
+from app.services.scrambler import generate_scramble_3x3
+from app.services.stats import calculate_average_trimmed, format_time
 
 
 def test_scramble_length_and_validity():
@@ -12,8 +10,8 @@ def test_scramble_length_and_validity():
     # Check that consecutive moves don't touch the same face
     for i in range(len(moves) - 1):
         face1 = moves[i][0]
-        face2 = moves[i+1][0]
-        assert face1 != face2, f"Consecutive moves share face: {moves[i]}, {moves[i+1]}"
+        face2 = moves[i + 1][0]
+        assert face1 != face2, f"Consecutive moves share face: {moves[i]}, {moves[i + 1]}"
 
 
 def test_calculate_average_trimmed_regular():
