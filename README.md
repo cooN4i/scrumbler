@@ -76,6 +76,29 @@ docker compose up --build -d
 
 ---
 
+## 🗄️ Миграции базы данных (Alembic)
+
+Управление схемой базы данных осуществляется через асинхронный Alembic:
+
+- **Применить все миграции:**
+  ```bash
+  alembic upgrade head
+  ```
+- **Создать новую автоматическую миграцию:**
+  ```bash
+  alembic revision --autogenerate -m "описание_изменений"
+  ```
+- **Откатить последнюю миграцию:**
+  ```bash
+  alembic downgrade -1
+  ```
+- **Проверить текущее состояние:**
+  ```bash
+  alembic current
+  ```
+
+---
+
 ## 🧪 Запуск тестов
 
 Проект покрыт юнит-тестами скрамблера, расчета средних и интеграционными асинхронными тестами API:
@@ -89,5 +112,6 @@ python -m pytest -v
 
 - **Backend:** FastAPI (Async ASGI), Pydantic v2, Pydantic-Settings
 - **Database:** SQLAlchemy 2.0 (Async), `aiosqlite` (локально) / `asyncpg` (PostgreSQL в Docker)
+- **Migrations:** Alembic (Async)
 - **Security:** JWT (python-jose), Passlib (bcrypt)
 - **Frontend:** Vanilla JS, CSS Glassmorphism & Cyberpunk Neon, Jinja2 templates
